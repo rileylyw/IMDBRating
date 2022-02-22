@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,11 +42,31 @@ public class IMDBRatingTest {
         InputStream stream = connection.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         String nextLine = reader.readLine();
+        ArrayList<String> seriesIMDB = new ArrayList<String>();
         while (nextLine != null) {
             nextLine = reader.readLine();
-            if(nextLine.contains("Bristol")) {
-                System.out.println("line " + nextLine);
+            if(nextLine!=null && nextLine.contains("> <img alt=")) {
+//                System.out.println("line " + nextLine);
+                seriesIMDB.add(nextLine.substring(nextLine.indexOf('"')+1, nextLine.lastIndexOf('"')));
+//                System.out.println(seriesIMDB);
             }
         }
+        URL url2 = new URL("https://en.wikipedia.org/wiki/Shoestring_(TV_series)#Episodes");
+        HttpURLConnection connection2 = (HttpURLConnection) url2.openConnection();
+        connection2.setDoOutput(true);
+        connection2.setRequestMethod("GET");
+        InputStream stream2 = connection2.getInputStream();
+        BufferedReader reader2 = new BufferedReader(new InputStreamReader(stream2));
+        String nextLine2 = reader2.readLine();
+        ArrayList<String> seriesWiki = new ArrayList<String>();
+        while (nextLine2 != null) {
+            nextLine2 = reader2.readLine();
+            if(nextLine2!=null && nextLine2.contains("<td class=\"summary\" style=\"text-align:left\">\"")) {
+                seriesWiki.add(nextLine2.substring(nextLine2.indexOf("text-align:left\">\"")+18, nextLine2.indexOf("\"</td><td")));
+//                System.out.println(seriesWiki);
+            }
+        }
+        seriesWiki.removeAll(seriesIMDB);
+        System.out.println(seriesWiki);
     }
 }
